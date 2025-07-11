@@ -62,3 +62,15 @@ print(my_function(9))
 def passfunc():
     pass
 
+# Hàm đệ quy
+def recursion(k):
+  if (k > 0):
+    result = k + recursion(k - 1)
+    print (result)
+  else:
+    result = 0
+  return result
+
+print ("Result is:")
+recursion(6)
+
