@@ -1,0 +1,5 @@
+FastAPI là gì?
+- Là một kiểu framwork web dựa trên Starlette và Pydantic
+- Ưu điểm: Nhanh, dễ viết, Swagger tự động, Validate mạnh mẽ
+- So sánh với Flask: FastAPI hiện đại hơn, sinh tài liẹu tự động, hỗ trợ async/await tốt
+- Dùng được cho Backend REST API, microservice, app ML/AI, startup MVP
