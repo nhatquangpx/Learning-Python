@@ -1,34 +1,46 @@
 from fastapi import FastAPI, Depends, HTTPException
 from sqlmodel import Session, select
-from auth import get_password_hash, authenticate_user, create_access_token, get_current_user
-from auth import ACCESS_TOKEN_EXPIRE_MINUTES
+from auth import (
+    get_password_hash,
+    authenticate_user,
+    create_access_token,
+    get_current_user,
+    ACCESS_TOKEN_EXPIRE_MINUTES,
+)
 from fastapi.security import OAuth2PasswordRequestForm
 from database import engine, create_db_and_tables
 from datetime import timedelta
-from auth import get_current_user
 from models import User, Post
+from schemas import UserCreate, UserRead, PostCreate, PostRead
+from typing import List
 
 app = FastAPI()
 
 @app.on_event("startup")
-def on_strartup():
+def on_startup():
     create_db_and_tables()
-  
-# Tạo route đăng ký/đăng nhập:
-@app.post("/register")
-def register_user(user: User):
+
+# ----------------------
+# AUTH
+# ----------------------
+
+@app.post("/register", response_model=UserRead)
+def register_user(user_data: UserCreate):
     with Session(engine) as session:
-        existing_user = session.exec(select(User).where(User.username == user.username)).first()
+        existing_user = session.exec(select(User).where(User.username == user_data.username)).first()
         if existing_user:
             raise HTTPException(status_code=400, detail="Username already exists")
-        
-        user.hashed_password = get_password_hash(user.hashed_password)
-        session.add(user)
+
+        new_user = User(
+            username=user_data.username,
+            hashed_password=get_password_hash(user_data.password)
+        )
+        session.add(new_user)
         session.commit()
-        session.refresh(user)
-        return {"measage": "User registered successfully", "user_id": user.id}
-    
-@app.post('/token')
+        session.refresh(new_user)
+        return new_user
+
+@app.post("/token")
 def login(form_data: OAuth2PasswordRequestForm = Depends()):
     user = authenticate_user(form_data.username, form_data.password)
     if not user:
@@ -37,25 +49,29 @@ def login(form_data: OAuth2PasswordRequestForm = Depends()):
     token = create_access_token({"sub": user.username}, access_token_expires)
     return {"access_token": token, "token_type": "bearer"}
 
-@app.get("/me")
+@app.get("/me", response_model=UserRead)
 def read_me(current_user: User = Depends(get_current_user)):
     return current_user
 
-@app.post("/posts/")
-def create_post(post: Post, current_user: User = Depends(get_current_user)):
-    post.author_id = current_user.id
+# ----------------------
+# POSTS CRUD
+# ----------------------
+
+@app.post("/posts/", response_model=PostRead)
+def create_post(post_data: PostCreate, current_user: User = Depends(get_current_user)):
+    post = Post(**post_data.dict(), author_id=current_user.id)
     with Session(engine) as session:
         session.add(post)
         session.commit()
         session.refresh(post)
         return post
 
-@app.get("/posts/")
+@app.get("/posts/", response_model=List[PostRead])
 def get_all_posts():
     with Session(engine) as session:
         return session.exec(select(Post)).all()
 
-@app.get("/posts/{post_id}")
+@app.get("/posts/{post_id}", response_model=PostRead)
 def get_post(post_id: int):
     with Session(engine) as session:
         post = session.get(Post, post_id)
@@ -63,14 +79,14 @@ def get_post(post_id: int):
             raise HTTPException(status_code=404, detail="Post not found")
         return post
 
-@app.put("/posts/{post_id}")
-def update_post(post_id: int, updated: Post, current_user: User = Depends(get_current_user)):
+@app.put("/posts/{post_id}", response_model=PostRead)
+def update_post(post_id: int, update_data: PostCreate, current_user: User = Depends(get_current_user)):
     with Session(engine) as session:
         post = session.get(Post, post_id)
         if not post or post.author_id != current_user.id:
             raise HTTPException(status_code=403, detail="Not authorized")
-        post.title = updated.title
-        post.content = updated.content
+        post.title = update_data.title
+        post.content = update_data.content
         session.add(post)
         session.commit()
         session.refresh(post)
