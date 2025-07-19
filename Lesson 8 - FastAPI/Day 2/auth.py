@@ -1,4 +1,4 @@
-from fastapi import Depend, HTTPException, status
+from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from jose import JWTError, jwt
 from passlib.context import CryptContext
@@ -27,7 +27,7 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 def verify_password(plain_password, hased_password):
     return pwd_context.verify(plain_password, hased_password)
 
-def get_passwword_hash(password):
+def get_password_hash(password):
     return pwd_context.hash(password)
 
 # Giải thích:
