@@ -6,7 +6,7 @@ class Post(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
     title: str
     content: str
-    created_at: datetime = Field(default_factory=datetime.utcnow)
+    created_at: Optional[datetime] = Field(default_factory=datetime.utcnow)
     
     author_id: Optional[int] = Field(default=None, foreign_key="user.id")
     author: Optional["User"] = Relationship(back_populates="posts")
