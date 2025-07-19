@@ -60,3 +60,68 @@ def test_create_post_without_token():
         "content": "This post should not be created."
     })
     assert response.status_code == 401  # Phải trả về lỗi 401 Unauthorized
+    
+# Cập nhật bài viết
+def test_update_post():
+    headers = {"Authorization": f"Bearer {token}"}
+    response = client.put(f"/posts/{post_id}", json={
+        "title": "Updated Test Post",
+        "content": "This is updated content for the test post."
+    }, headers=headers)
+    assert response.status_code == 200
+    assert response.json()["title"] == "Updated Test Post"
+    assert response.json()["content"] == "This is updated content for the test post."
+    assert response.json()["id"] == post_id
+
+# Kiểm thử cập nhật bài viết không có token -> phải bị từ chối
+def test_update_post_without_token():
+    response = client.put(f"/posts/{post_id}", json={
+        "title": "Unauthorized Update",
+        "content": "This update should not work."
+    })
+    assert response.status_code == 401  # Phải trả về lỗi 401 Unauthorized
+
+# Kiểm thử cập nhật bài viết không tồn tại
+def test_update_nonexistent_post():
+    headers = {"Authorization": f"Bearer {token}"}
+    response = client.put("/posts/99999", json={
+        "title": "Update Non-existent",
+        "content": "This post does not exist."
+    }, headers=headers)
+    assert response.status_code == 403  # Phải trả về lỗi 404 Not Found
+
+# Xóa bài viết
+# Xóa bài viết
+def test_delete_post():
+    headers = {"Authorization": f"Bearer {token}"}
+    response = client.delete(f"/posts/{post_id}", headers=headers)
+    assert response.status_code == 200
+    assert "deleted" in response.json()
+    assert response.json()["deleted"] == True
+    
+    # Kiểm tra xem bài viết đã bị xóa chưa
+    response_check = client.get(f"/posts/{post_id}")
+    assert response_check.status_code == 404  # Bài viết không còn tồn tại
+
+# Kiểm thử xóa bài viết không có token -> phải bị từ chối
+def test_delete_post_without_token():
+    # Tạo bài viết mới để test xóa
+    headers = {"Authorization": f"Bearer {token}"}
+    response = client.post("/posts/", json={
+        "title": "Post to Delete",
+        "content": "This post will be used for delete test."
+    }, headers=headers)
+    temp_post_id = response.json()["id"]
+    
+    # Thử xóa không có token
+    response = client.delete(f"/posts/{temp_post_id}")
+    assert response.status_code == 401  # Phải trả về lỗi 401 Unauthorized
+    
+    # Cleanup: Xóa bài viết test
+    client.delete(f"/posts/{temp_post_id}", headers=headers)
+
+# Kiểm thử xóa bài viết không tồn tại
+def test_delete_nonexistent_post():
+    headers = {"Authorization": f"Bearer {token}"}
+    response = client.delete("/posts/99999", headers=headers)
+    assert response.status_code == 403  # Phải trả về lỗi 404 Not Found
