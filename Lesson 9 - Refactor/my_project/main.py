@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from app.routers import users, posts
+from my_project.routers import users, posts
 
 app = FastAPI()
 
