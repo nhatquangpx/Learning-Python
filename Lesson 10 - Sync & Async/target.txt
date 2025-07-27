@@ -1,0 +1,6 @@
+Mục tiêu của buổi học:
+- Hiểu rõ cơ chế xử lý sync/async
+- Tạo route async trong FastAPI -> Bài viết async def route đúng cách
+- Sử dụng BackgroundTasks -> Thực hiện tác vụ nền sau khi trả response
+- Ứng dụng thực tế: Gửi email giả lập, ghi log, resize ảnh
+- Viết test cho background task (có hoặc không cần chờ hoàn tất)
