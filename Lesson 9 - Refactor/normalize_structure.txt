@@ -1,0 +1,23 @@
+Cấu trúc chuẩn hóa (có thể dùng suốt sự nghiệp backend):
+my_project/
+│
+├── main.py              # Điểm vào của ứng dụng FastAPI
+├── database.py          # Kết nối CSDL (SQLModel/SQLAlchemy)
+├── models.py            # Các lớp đại diện bảng DB (User, Post)
+├── schemas.py           # Lớp Pydantic phục vụ validate input/output
+├── routers/             # Tập hợp các API endpoints chia theo domain
+│   ├── users.py
+│   └── posts.py
+├── services/            # Chứa logic nghiệp vụ (service layer)
+│   ├── auth.py
+│   └── post_service.py
+├── tests/               # Chứa toàn bộ file kiểm thử (unit/integration test)
+│   └── test_posts.py
+└── utils/               # (nếu cần) Chứa các hàm phụ trợ nhỏ: hash, email, upload...
+
+- main.py: Chỉ nên chứa khởi tạo app và import routers
+- routers/: Chỉ tập trung xử lý route + res/req
+- services/: Chứa logic nghiệp vụ như "kiểm tra người dùng", "tạo bài viết"
+- schemas.py: Là contract giao tiếp với frontend, định nghĩa kiểu dữ liệu đầu vào/đầu ra
+- models.py: Là đại diện bảng database, tương tác với cơ sở dữ liệu
+- tests/: Viết unit test hoặc integration test

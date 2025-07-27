@@ -1,0 +1,4 @@
+Mục tiêu của buổi học:
+- Tổ chức dự án FastAPI theo module: Project có cấu trúc rõ ràng, dễ mở rộng
+- Biết dùng Dependency Injection (DJ): Route gọn gàng, dễ test
+- Viết unit test với pytest và TestClient: Test được auth và CRUD, phản xạ tốt khi thay đổi logic
